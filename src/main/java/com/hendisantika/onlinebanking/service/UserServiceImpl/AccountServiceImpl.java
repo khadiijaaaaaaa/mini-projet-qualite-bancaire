@@ -11,6 +11,7 @@ import com.hendisantika.onlinebanking.service.AccountService;
 import com.hendisantika.onlinebanking.service.TransactionService;
 import com.hendisantika.onlinebanking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -38,6 +39,7 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private SavingsAccountDao savingsAccountDao;
 
+    @Qualifier("")
     @Autowired
     private UserService userService;
 
