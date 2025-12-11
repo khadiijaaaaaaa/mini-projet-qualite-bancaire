@@ -1,0 +1,269 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TransactionServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.hendisantika.onlinebanking.service.UserServiceImpl</a>
+</div>
+
+<h1>Coverage Summary for Class: TransactionServiceImpl (com.hendisantika.onlinebanking.service.UserServiceImpl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TransactionServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/48)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.hendisantika.onlinebanking.service.UserServiceImpl;
+&nbsp;
+&nbsp;import com.hendisantika.onlinebanking.entity.PrimaryAccount;
+&nbsp;import com.hendisantika.onlinebanking.entity.PrimaryTransaction;
+&nbsp;import com.hendisantika.onlinebanking.entity.Recipient;
+&nbsp;import com.hendisantika.onlinebanking.entity.SavingsAccount;
+&nbsp;import com.hendisantika.onlinebanking.entity.SavingsTransaction;
+&nbsp;import com.hendisantika.onlinebanking.entity.User;
+&nbsp;import com.hendisantika.onlinebanking.repository.PrimaryAccountDao;
+&nbsp;import com.hendisantika.onlinebanking.repository.PrimaryTransactionDao;
+&nbsp;import com.hendisantika.onlinebanking.repository.RecipientDao;
+&nbsp;import com.hendisantika.onlinebanking.repository.SavingsAccountDao;
+&nbsp;import com.hendisantika.onlinebanking.repository.SavingsTransactionDao;
+&nbsp;import com.hendisantika.onlinebanking.service.TransactionService;
+&nbsp;import com.hendisantika.onlinebanking.service.UserService;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.security.Principal;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;/**
+&nbsp; * Created by IntelliJ IDEA.
+&nbsp; * Project : online-banking
+&nbsp; * User: hendisantika
+&nbsp; * Email: hendisantika@gmail.com
+&nbsp; * Telegram : @hendisantika34
+&nbsp; * Date: 10/08/18
+&nbsp; * Time: 06.21
+&nbsp; * To change this template use File | Settings | File Templates.
+&nbsp; */
+&nbsp;@Service
+<b class="nc">&nbsp;public class TransactionServiceImpl implements TransactionService {</b>
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private UserService userService;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private PrimaryTransactionDao primaryTransactionDao;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private SavingsTransactionDao savingsTransactionDao;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private PrimaryAccountDao primaryAccountDao;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private SavingsAccountDao savingsAccountDao;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    private RecipientDao recipientDao;
+&nbsp;
+&nbsp;
+&nbsp;    public List&lt;PrimaryTransaction&gt; findPrimaryTransactionList(String username) {
+<b class="nc">&nbsp;        User user = userService.findByUsername(username);</b>
+<b class="nc">&nbsp;        List&lt;PrimaryTransaction&gt; primaryTransactionList = user.getPrimaryAccount().getPrimaryTransactionList();</b>
+&nbsp;
+<b class="nc">&nbsp;        return primaryTransactionList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;SavingsTransaction&gt; findSavingsTransactionList(String username) {
+<b class="nc">&nbsp;        User user = userService.findByUsername(username);</b>
+<b class="nc">&nbsp;        List&lt;SavingsTransaction&gt; savingsTransactionList = user.getSavingsAccount().getSavingsTransactionList();</b>
+&nbsp;
+<b class="nc">&nbsp;        return savingsTransactionList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void savePrimaryDepositTransaction(PrimaryTransaction primaryTransaction) {
+<b class="nc">&nbsp;        primaryTransactionDao.save(primaryTransaction);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void saveSavingsDepositTransaction(SavingsTransaction savingsTransaction) {
+<b class="nc">&nbsp;        savingsTransactionDao.save(savingsTransaction);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void savePrimaryWithdrawTransaction(PrimaryTransaction primaryTransaction) {
+<b class="nc">&nbsp;        primaryTransactionDao.save(primaryTransaction);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void saveSavingsWithdrawTransaction(SavingsTransaction savingsTransaction) {
+<b class="nc">&nbsp;        savingsTransactionDao.save(savingsTransaction);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void betweenAccountsTransfer(String transferFrom, String transferTo, String amount, PrimaryAccount primaryAccount, SavingsAccount savingsAccount) throws Exception {
+<b class="nc">&nbsp;        if (transferFrom.equalsIgnoreCase(&quot;Primary&quot;) &amp;&amp; transferTo.equalsIgnoreCase(&quot;Savings&quot;)) {</b>
+<b class="nc">&nbsp;            primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().subtract(new BigDecimal(amount)));</b>
+<b class="nc">&nbsp;            savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().add(new BigDecimal(amount)));</b>
+<b class="nc">&nbsp;            primaryAccountDao.save(primaryAccount);</b>
+<b class="nc">&nbsp;            savingsAccountDao.save(savingsAccount);</b>
+&nbsp;
+<b class="nc">&nbsp;            Date date = new Date();</b>
+&nbsp;
+<b class="nc">&nbsp;            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, &quot;Between account transfer from &quot; + transferFrom + &quot; to &quot; + transferTo, &quot;Account&quot;, &quot;Finished&quot;, Double.parseDouble(amount), primaryAccount.getAccountBalance(), primaryAccount);</b>
+<b class="nc">&nbsp;            primaryTransactionDao.save(primaryTransaction);</b>
+<b class="nc">&nbsp;        } else if (transferFrom.equalsIgnoreCase(&quot;Savings&quot;) &amp;&amp; transferTo.equalsIgnoreCase(&quot;Primary&quot;)) {</b>
+<b class="nc">&nbsp;            primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().add(new BigDecimal(amount)));</b>
+<b class="nc">&nbsp;            savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(new BigDecimal(amount)));</b>
+<b class="nc">&nbsp;            primaryAccountDao.save(primaryAccount);</b>
+<b class="nc">&nbsp;            savingsAccountDao.save(savingsAccount);</b>
+&nbsp;
+<b class="nc">&nbsp;            Date date = new Date();</b>
+&nbsp;
+<b class="nc">&nbsp;            SavingsTransaction savingsTransaction = new SavingsTransaction(date, &quot;Between account transfer from &quot; + transferFrom + &quot; to &quot; + transferTo, &quot;Transfer&quot;, &quot;Finished&quot;, Double.parseDouble(amount), savingsAccount.getAccountBalance(), savingsAccount);</b>
+<b class="nc">&nbsp;            savingsTransactionDao.save(savingsTransaction);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            throw new Exception(&quot;Invalid Transfer&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public List&lt;Recipient&gt; findRecipientList(Principal principal) {
+<b class="nc">&nbsp;        String username = principal.getName();</b>
+<b class="nc">&nbsp;        List&lt;Recipient&gt; recipientList = recipientDao.findAll().stream()</b>
+<b class="nc">&nbsp;                .filter(recipient -&gt; username.equals(recipient.getUser().getUsername()))</b>
+<b class="nc">&nbsp;                .collect(Collectors.toList());</b>
+&nbsp;
+<b class="nc">&nbsp;        return recipientList;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Recipient saveRecipient(Recipient recipient) {
+<b class="nc">&nbsp;        return recipientDao.save(recipient);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public Recipient findRecipientByName(String recipientName) {
+<b class="nc">&nbsp;        return recipientDao.findByName(recipientName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void deleteRecipientByName(String recipientName) {
+<b class="nc">&nbsp;        recipientDao.deleteByName(recipientName);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public void toSomeoneElseTransfer(Recipient recipient, String accountType, String amount, PrimaryAccount primaryAccount, SavingsAccount savingsAccount) {
+<b class="nc">&nbsp;        if (accountType.equalsIgnoreCase(&quot;Primary&quot;)) {</b>
+<b class="nc">&nbsp;            primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().subtract(new BigDecimal(amount)));</b>
+<b class="nc">&nbsp;            primaryAccountDao.save(primaryAccount);</b>
+&nbsp;
+<b class="nc">&nbsp;            Date date = new Date();</b>
+&nbsp;
+<b class="nc">&nbsp;            PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, &quot;Transfer to recipient &quot; + recipient.getName(), &quot;Transfer&quot;, &quot;Finished&quot;, Double.parseDouble(amount), primaryAccount.getAccountBalance(), primaryAccount);</b>
+<b class="nc">&nbsp;            primaryTransactionDao.save(primaryTransaction);</b>
+<b class="nc">&nbsp;        } else if (accountType.equalsIgnoreCase(&quot;Savings&quot;)) {</b>
+<b class="nc">&nbsp;            savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(new BigDecimal(amount)));</b>
+<b class="nc">&nbsp;            savingsAccountDao.save(savingsAccount);</b>
+&nbsp;
+<b class="nc">&nbsp;            Date date = new Date();</b>
+&nbsp;
+<b class="nc">&nbsp;            SavingsTransaction savingsTransaction = new SavingsTransaction(date, &quot;Transfer to recipient &quot; + recipient.getName(), &quot;Transfer&quot;, &quot;Finished&quot;, Double.parseDouble(amount), savingsAccount.getAccountBalance(), savingsAccount);</b>
+<b class="nc">&nbsp;            savingsTransactionDao.save(savingsTransaction);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-12-11 21:39</div>
+</div>
+</body>
+</html>
