@@ -36,6 +36,7 @@ public class TransferController {
     private TransactionService transactionService;
 
     @Autowired
+    @org.springframework.beans.factory.annotation.Qualifier("userServiceImpl")
     private UserService userService;
 
     @RequestMapping(value = "/betweenAccounts", method = RequestMethod.GET)

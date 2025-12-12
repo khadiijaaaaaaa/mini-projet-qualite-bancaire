@@ -1,6 +1,5 @@
 package com.hendisantika.onlinebanking.resource;
 
-import static org.junit.jupiter.api.Assertions.*;
 import com.hendisantika.onlinebanking.entity.PrimaryTransaction;
 import com.hendisantika.onlinebanking.entity.SavingsTransaction;
 import com.hendisantika.onlinebanking.entity.User;

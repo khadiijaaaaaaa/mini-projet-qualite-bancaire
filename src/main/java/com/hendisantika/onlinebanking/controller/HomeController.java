@@ -32,6 +32,7 @@ import java.util.Set;
 public class HomeController {
 
     @Autowired
+    @org.springframework.beans.factory.annotation.Qualifier("userServiceImpl")
     private UserService userService;
 
     @Autowired

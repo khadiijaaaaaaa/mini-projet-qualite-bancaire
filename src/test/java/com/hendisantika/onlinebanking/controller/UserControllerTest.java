@@ -1,6 +1,5 @@
 package com.hendisantika.onlinebanking.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import com.hendisantika.onlinebanking.entity.User;
 import com.hendisantika.onlinebanking.service.UserService;

@@ -33,6 +33,7 @@ import java.util.List;
 public class AccountController {
 
     @Autowired
+    @org.springframework.beans.factory.annotation.Qualifier("userServiceImpl")
     private UserService userService;
 
     @Autowired
