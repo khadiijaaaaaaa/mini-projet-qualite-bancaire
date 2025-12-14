@@ -6,7 +6,7 @@ import com.hendisantika.onlinebanking.entity.User;
 import com.hendisantika.onlinebanking.repository.RoleDao;
 import com.hendisantika.onlinebanking.security.UserRole;
 import com.hendisantika.onlinebanking.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,25 +18,19 @@ import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by IntelliJ IDEA.
- * Project : online-banking
- * User: hendisantika
- * Email: hendisantika@gmail.com
- * Telegram : @hendisantika34
- * Date: 04/09/18
- * Time: 06.34
- * To change this template use File | Settings | File Templates.
- */
 @Controller
 public class HomeController {
 
-    @Autowired
-    @org.springframework.beans.factory.annotation.Qualifier("userServiceImpl")
-    private UserService userService;
+    private final UserService userService;
+    private final RoleDao roleDao;
 
-    @Autowired
-    private RoleDao roleDao;
+    public HomeController(
+            @Qualifier("userServiceImpl") UserService userService,
+            RoleDao roleDao
+    ) {
+        this.userService = userService;
+        this.roleDao = roleDao;
+    }
 
     @RequestMapping("/")
     public String home() {
@@ -50,10 +44,7 @@ public class HomeController {
 
     @GetMapping("/signup")
     public String signup(Model model) {
-        User user = new User();
-
-        model.addAttribute("user", user);
-
+        model.addAttribute("user", new User());
         return "signup";
     }
 
@@ -71,24 +62,21 @@ public class HomeController {
             }
 
             return "signup";
-        } else {
-            Set<UserRole> userRoles = new HashSet<>();
-            userRoles.add(new UserRole(user, roleDao.findByName("ROLE_USER")));
-
-            userService.createUser(user, userRoles);
-
-            return "redirect:/";
         }
+
+        Set<UserRole> userRoles = new HashSet<>();
+        userRoles.add(new UserRole(user, roleDao.findByName("ROLE_USER")));
+        userService.createUser(user, userRoles);
+
+        return "redirect:/";
     }
 
     @GetMapping("/userFront")
     public String userFront(Principal principal, Model model) {
         User user = userService.findByUsername(principal.getName());
-        PrimaryAccount primaryAccount = user.getPrimaryAccount();
-        SavingsAccount savingsAccount = user.getSavingsAccount();
 
-        model.addAttribute("primaryAccount", primaryAccount);
-        model.addAttribute("savingsAccount", savingsAccount);
+        model.addAttribute("primaryAccount", user.getPrimaryAccount());
+        model.addAttribute("savingsAccount", user.getSavingsAccount());
 
         return "userFront";
     }
