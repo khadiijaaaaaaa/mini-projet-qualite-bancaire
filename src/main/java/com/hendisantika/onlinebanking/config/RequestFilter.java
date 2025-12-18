@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestFilter implements Filter {
 
+    // 1. Initialisation du Logger
+    private static final Logger logger = LoggerFactory.getLogger(RequestFilter.class);
+
+    @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) {
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
@@ -40,10 +46,13 @@ public class RequestFilter implements Filter {
             try {
                 chain.doFilter(req, res);
             } catch (Exception e) {
-                e.printStackTrace();
+                // CORRECTION : On utilise le logger pour les erreurs, pas printStackTrace
+                logger.error("Erreur inattendue dans le filtre de requête", e);
             }
         } else {
-            System.out.println("Pre-flight");
+            // CORRECTION : On utilise le logger pour l'info, pas System.out
+            logger.info("Pre-flight request detected");
+
             response.setHeader("Access-Control-Allow-Methods", "POST,GET,DELETE");
             response.setHeader("Access-Control-Max-Age", "3600");
             response.setHeader("Access-Control-Allow-Headers", "authorization, content-type," +
@@ -53,10 +62,15 @@ public class RequestFilter implements Filter {
 
     }
 
+    // CORRECTION (S1185, S1161) : Ajout de @Override et d'un commentaire explicatif
+    @Override
     public void init(FilterConfig filterConfig) {
+        // Méthode intentionnellement laissée vide. Aucune initialisation spécifique requise.
     }
 
+    // CORRECTION (S1185, S1161) : Ajout de @Override et d'un commentaire explicatif
+    @Override
     public void destroy() {
+        // Méthode intentionnellement laissée vide. Aucun nettoyage spécifique requis.
     }
-
 }

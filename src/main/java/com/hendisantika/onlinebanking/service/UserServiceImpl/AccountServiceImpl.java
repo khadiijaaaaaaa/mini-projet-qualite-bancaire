@@ -20,6 +20,13 @@ import java.util.Date;
 @Service
 public class AccountServiceImpl implements AccountService {
 
+    // CORRECTION (S1192): Création de constantes pour les littéraux dupliqués
+    private static final String ACCOUNT = "Account";
+    private static final String FINISHED = "Finished";
+    private static final String PRIMARY = "Primary";
+    private static final String SAVINGS = "Savings";
+
+    // Variable statique partagée pour la génération de numéros de compte
     private static int nextAccountNumber = 11223101;
 
     private final PrimaryAccountDao primaryAccountDao;
@@ -66,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
         User user = userService.findByUsername(principal.getName());
         BigDecimal delta = BigDecimal.valueOf(amount).stripTrailingZeros();
 
-        if (accountType.equalsIgnoreCase("Primary")) {
+        if (accountType.equalsIgnoreCase(PRIMARY)) {
             PrimaryAccount primaryAccount = user.getPrimaryAccount();
             primaryAccount.setAccountBalance(
                     primaryAccount.getAccountBalance().add(delta)
@@ -76,15 +83,15 @@ public class AccountServiceImpl implements AccountService {
             PrimaryTransaction primaryTransaction = new PrimaryTransaction(
                     new Date(),
                     "Deposit to Primary Account",
-                    "Account",
-                    "Finished",
+                    ACCOUNT,
+                    FINISHED,
                     amount,
                     primaryAccount.getAccountBalance(),
                     primaryAccount
             );
             transactionService.savePrimaryDepositTransaction(primaryTransaction);
 
-        } else if (accountType.equalsIgnoreCase("Savings")) {
+        } else if (accountType.equalsIgnoreCase(SAVINGS)) {
             SavingsAccount savingsAccount = user.getSavingsAccount();
             savingsAccount.setAccountBalance(
                     savingsAccount.getAccountBalance().add(delta)
@@ -94,8 +101,8 @@ public class AccountServiceImpl implements AccountService {
             SavingsTransaction savingsTransaction = new SavingsTransaction(
                     new Date(),
                     "Deposit to savings Account",
-                    "Account",
-                    "Finished",
+                    ACCOUNT,
+                    FINISHED,
                     amount,
                     savingsAccount.getAccountBalance(),
                     savingsAccount
@@ -109,7 +116,7 @@ public class AccountServiceImpl implements AccountService {
         User user = userService.findByUsername(principal.getName());
         BigDecimal delta = BigDecimal.valueOf(amount).stripTrailingZeros();
 
-        if (accountType.equalsIgnoreCase("Primary")) {
+        if (accountType.equalsIgnoreCase(PRIMARY)) {
             PrimaryAccount primaryAccount = user.getPrimaryAccount();
             primaryAccount.setAccountBalance(
                     primaryAccount.getAccountBalance().subtract(delta)
@@ -119,15 +126,15 @@ public class AccountServiceImpl implements AccountService {
             PrimaryTransaction primaryTransaction = new PrimaryTransaction(
                     new Date(),
                     "Withdraw from Primary Account",
-                    "Account",
-                    "Finished",
+                    ACCOUNT,
+                    FINISHED,
                     amount,
                     primaryAccount.getAccountBalance(),
                     primaryAccount
             );
             transactionService.savePrimaryWithdrawTransaction(primaryTransaction);
 
-        } else if (accountType.equalsIgnoreCase("Savings")) {
+        } else if (accountType.equalsIgnoreCase(SAVINGS)) {
             SavingsAccount savingsAccount = user.getSavingsAccount();
             savingsAccount.setAccountBalance(
                     savingsAccount.getAccountBalance().subtract(delta)
@@ -137,8 +144,8 @@ public class AccountServiceImpl implements AccountService {
             SavingsTransaction savingsTransaction = new SavingsTransaction(
                     new Date(),
                     "Withdraw from savings Account",
-                    "Account",
-                    "Finished",
+                    ACCOUNT,
+                    FINISHED,
                     amount,
                     savingsAccount.getAccountBalance(),
                     savingsAccount
@@ -147,7 +154,9 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    private int accountGen() {
+    // CORRECTION (S2696): La méthode doit être statique pour modifier un champ statique
+    // Ajout de 'synchronized' pour la sécurité en environnement multi-thread
+    private static synchronized int accountGen() {
         return ++nextAccountNumber;
     }
 }

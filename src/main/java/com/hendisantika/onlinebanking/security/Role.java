@@ -30,7 +30,7 @@ public class Role {
     private Set<UserRole> userRoles = new HashSet<>();
 
     public Role() {
-
+        // Constructeur vide par défaut requis par JPA pour l'instanciation
     }
 
     public int getRoleId() {
@@ -56,6 +56,4 @@ public class Role {
     public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
     }
-
-
 }

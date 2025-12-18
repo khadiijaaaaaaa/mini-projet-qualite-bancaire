@@ -1,5 +1,6 @@
 package com.hendisantika.onlinebanking.controller;
 
+import com.hendisantika.onlinebanking.dto.RecipientForm;
 import com.hendisantika.onlinebanking.entity.PrimaryAccount;
 import com.hendisantika.onlinebanking.entity.Recipient;
 import com.hendisantika.onlinebanking.entity.SavingsAccount;
@@ -10,10 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -25,6 +23,10 @@ public class TransferController {
     private final TransactionService transactionService;
     private final UserService userService;
 
+    // CORRECTION (S1192) : Constantes pour éviter la duplication de String literals
+    private static final String RECIPIENT = "recipient";
+    private static final String RECIPIENT_LIST = "recipientList";
+
     public TransferController(
             TransactionService transactionService,
             @Qualifier("userServiceImpl") UserService userService
@@ -33,7 +35,8 @@ public class TransferController {
         this.userService = userService;
     }
 
-    @RequestMapping(value = "/betweenAccounts", method = RequestMethod.GET)
+    // CORRECTION (S3752) : @GetMapping explicite
+    @GetMapping("/betweenAccounts")
     public String betweenAccounts(Model model) {
         model.addAttribute("transferFrom", "");
         model.addAttribute("transferTo", "");
@@ -41,7 +44,8 @@ public class TransferController {
         return "betweenAccounts";
     }
 
-    @RequestMapping(value = "/betweenAccounts", method = RequestMethod.POST)
+    // CORRECTION (S3752) : @PostMapping explicite
+    @PostMapping("/betweenAccounts")
     public String betweenAccountsPost(
             @ModelAttribute("transferFrom") String transferFrom,
             @ModelAttribute("transferTo") String transferTo,
@@ -64,27 +68,36 @@ public class TransferController {
         return "redirect:/userFront";
     }
 
-    @RequestMapping(value = "/recipient", method = RequestMethod.GET)
+    @GetMapping("/recipient")
     public String recipient(Model model, Principal principal) {
         List<Recipient> recipientList = transactionService.findRecipientList(principal);
 
-        model.addAttribute("recipientList", recipientList);
-        model.addAttribute("recipient", new Recipient());
+        // Utilisation des constantes
+        model.addAttribute(RECIPIENT_LIST, recipientList);
+        model.addAttribute(RECIPIENT, new RecipientForm());
 
-        return "recipient";
+        return RECIPIENT;
     }
 
-    @RequestMapping(value = "/recipient/save", method = RequestMethod.POST)
-    public String recipientPost(@ModelAttribute("recipient") Recipient recipient, Principal principal) {
-
+    @PostMapping("/recipient/save")
+    public String recipientPost(@ModelAttribute(RECIPIENT) RecipientForm recipientForm, Principal principal) {
         User user = userService.findByUsername(principal.getName());
+
+        Recipient recipient = new Recipient();
+        recipient.setId(recipientForm.getId());
+        recipient.setName(recipientForm.getName());
+        recipient.setEmail(recipientForm.getEmail());
+        recipient.setPhone(recipientForm.getPhone());
+        recipient.setAccountNumber(recipientForm.getAccountNumber());
+        recipient.setDescription(recipientForm.getDescription());
         recipient.setUser(user);
+
         transactionService.saveRecipient(recipient);
 
         return "redirect:/transfer/recipient";
     }
 
-    @RequestMapping(value = "/recipient/edit", method = RequestMethod.GET)
+    @GetMapping("/recipient/edit")
     public String recipientEdit(
             @RequestParam("recipientName") String recipientName,
             Model model,
@@ -93,13 +106,22 @@ public class TransferController {
         Recipient recipient = transactionService.findRecipientByName(recipientName);
         List<Recipient> recipientList = transactionService.findRecipientList(principal);
 
-        model.addAttribute("recipientList", recipientList);
-        model.addAttribute("recipient", recipient);
+        RecipientForm form = new RecipientForm();
+        form.setId(recipient.getId());
+        form.setName(recipient.getName());
+        form.setEmail(recipient.getEmail());
+        form.setPhone(recipient.getPhone());
+        form.setAccountNumber(recipient.getAccountNumber());
+        form.setDescription(recipient.getDescription());
 
-        return "recipient";
+        // Utilisation des constantes
+        model.addAttribute(RECIPIENT_LIST, recipientList);
+        model.addAttribute(RECIPIENT, form);
+
+        return RECIPIENT;
     }
 
-    @RequestMapping(value = "/recipient/delete", method = RequestMethod.GET)
+    @GetMapping("/recipient/delete")
     @Transactional
     public String recipientDelete(
             @RequestParam("recipientName") String recipientName,
@@ -108,20 +130,22 @@ public class TransferController {
     ) {
         transactionService.deleteRecipientByName(recipientName);
 
-        model.addAttribute("recipientList", transactionService.findRecipientList(principal));
-        model.addAttribute("recipient", new Recipient());
+        List<Recipient> recipientList = transactionService.findRecipientList(principal);
 
-        return "recipient";
+        model.addAttribute(RECIPIENT_LIST, recipientList);
+        model.addAttribute(RECIPIENT, new RecipientForm());
+
+        return RECIPIENT;
     }
 
-    @RequestMapping(value = "/toSomeoneElse", method = RequestMethod.GET)
+    @GetMapping("/toSomeoneElse")
     public String toSomeoneElse(Model model, Principal principal) {
-        model.addAttribute("recipientList", transactionService.findRecipientList(principal));
+        model.addAttribute(RECIPIENT_LIST, transactionService.findRecipientList(principal));
         model.addAttribute("accountType", "");
         return "toSomeoneElse";
     }
 
-    @RequestMapping(value = "/toSomeoneElse", method = RequestMethod.POST)
+    @PostMapping("/toSomeoneElse")
     public String toSomeoneElsePost(
             @ModelAttribute("recipientName") String recipientName,
             @ModelAttribute("accountType") String accountType,

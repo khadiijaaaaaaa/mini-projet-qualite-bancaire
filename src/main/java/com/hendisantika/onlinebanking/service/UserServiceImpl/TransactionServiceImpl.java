@@ -25,6 +25,13 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
+    // CORRECTION (S1192) : Constantes pour éviter la duplication ("Magic Strings")
+    private static final String PRIMARY = "Primary";
+    private static final String SAVINGS = "Savings";
+    private static final String TRANSFER = "Transfer";
+    private static final String FINISHED = "Finished";
+    private static final String BETWEEN_ACC_TRANSFER = "Between account transfer from %s to %s";
+
     private final UserService userService;
     private final PrimaryTransactionDao primaryTransactionDao;
     private final SavingsTransactionDao savingsTransactionDao;
@@ -87,12 +94,13 @@ public class TransactionServiceImpl implements TransactionService {
             String amount,
             PrimaryAccount primaryAccount,
             SavingsAccount savingsAccount
-    ) throws Exception {
+    ) {
+        // CORRECTION (S112) : Suppression de "throws Exception" inutile car IllegalArgumentException est unchecked
 
         BigDecimal delta = new BigDecimal(amount).stripTrailingZeros();
         double amountDouble = Double.parseDouble(amount);
 
-        if (transferFrom.equalsIgnoreCase("Primary") && transferTo.equalsIgnoreCase("Savings")) {
+        if (transferFrom.equalsIgnoreCase(PRIMARY) && transferTo.equalsIgnoreCase(SAVINGS)) {
 
             primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().subtract(delta));
             savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().add(delta));
@@ -102,16 +110,16 @@ public class TransactionServiceImpl implements TransactionService {
 
             PrimaryTransaction primaryTransaction = new PrimaryTransaction(
                     new Date(),
-                    "Between account transfer from " + transferFrom + " to " + transferTo,
+                    String.format(BETWEEN_ACC_TRANSFER, transferFrom, transferTo),
                     "Account",
-                    "Finished",
+                    FINISHED,
                     amountDouble,
                     primaryAccount.getAccountBalance(),
                     primaryAccount
             );
             primaryTransactionDao.save(primaryTransaction);
 
-        } else if (transferFrom.equalsIgnoreCase("Savings") && transferTo.equalsIgnoreCase("Primary")) {
+        } else if (transferFrom.equalsIgnoreCase(SAVINGS) && transferTo.equalsIgnoreCase(PRIMARY)) {
 
             primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().add(delta));
             savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(delta));
@@ -121,9 +129,9 @@ public class TransactionServiceImpl implements TransactionService {
 
             SavingsTransaction savingsTransaction = new SavingsTransaction(
                     new Date(),
-                    "Between account transfer from " + transferFrom + " to " + transferTo,
-                    "Transfer",
-                    "Finished",
+                    String.format(BETWEEN_ACC_TRANSFER, transferFrom, transferTo),
+                    TRANSFER,
+                    FINISHED,
                     amountDouble,
                     savingsAccount.getAccountBalance(),
                     savingsAccount
@@ -131,7 +139,8 @@ public class TransactionServiceImpl implements TransactionService {
             savingsTransactionDao.save(savingsTransaction);
 
         } else {
-            throw new Exception("Invalid Transfer");
+            // CORRECTION (S112) : Utilisation d'une exception spécifique au lieu de "Exception" générique
+            throw new IllegalArgumentException("Invalid Transfer");
         }
     }
 
@@ -140,7 +149,8 @@ public class TransactionServiceImpl implements TransactionService {
         String username = principal.getName();
         return recipientDao.findAll().stream()
                 .filter(recipient -> username.equals(recipient.getUser().getUsername()))
-                .collect(Collectors.toList());
+                // CORRECTION (Java 16+) : Remplacement de collect(Collectors.toList()) par toList()
+                .toList();
     }
 
     @Override
@@ -170,30 +180,30 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal delta = new BigDecimal(amount).stripTrailingZeros();
         double amountDouble = Double.parseDouble(amount);
 
-        if (accountType.equalsIgnoreCase("Primary")) {
+        if (accountType.equalsIgnoreCase(PRIMARY)) {
             primaryAccount.setAccountBalance(primaryAccount.getAccountBalance().subtract(delta));
             primaryAccountDao.save(primaryAccount);
 
             PrimaryTransaction primaryTransaction = new PrimaryTransaction(
                     new Date(),
                     "Transfer to recipient " + recipient.getName(),
-                    "Transfer",
-                    "Finished",
+                    TRANSFER,
+                    FINISHED,
                     amountDouble,
                     primaryAccount.getAccountBalance(),
                     primaryAccount
             );
             primaryTransactionDao.save(primaryTransaction);
 
-        } else if (accountType.equalsIgnoreCase("Savings")) {
+        } else if (accountType.equalsIgnoreCase(SAVINGS)) {
             savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(delta));
             savingsAccountDao.save(savingsAccount);
 
             SavingsTransaction savingsTransaction = new SavingsTransaction(
                     new Date(),
                     "Transfer to recipient " + recipient.getName(),
-                    "Transfer",
-                    "Finished",
+                    TRANSFER,
+                    FINISHED,
                     amountDouble,
                     savingsAccount.getAccountBalance(),
                     savingsAccount

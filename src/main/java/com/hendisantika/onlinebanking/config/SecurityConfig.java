@@ -29,10 +29,7 @@ import java.security.SecureRandom;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-//    @Autowired
-//    private Environment env;
-
-    private static final String SALT = "salt"; // Salt should be protected carefully
+    private static final String SALT = "salt";
     private static final String[] PUBLIC_MATCHERS = {
             "/webjars/**",
             "/css/**",
@@ -45,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/console/**",
             "/signup"
     };
+
     @Autowired
     private UserSecurityService userSecurityService;
 
@@ -56,13 +54,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .authorizeRequests().
-//                antMatchers("/**").
-        antMatchers(PUBLIC_MATCHERS).
-                permitAll().anyRequest().authenticated();
+                .authorizeRequests()
+                .antMatchers(PUBLIC_MATCHERS).permitAll()
+                .anyRequest().authenticated();
 
         http
-                .csrf().disable().cors().disable()
+                // CORRECTION SÉCURITÉ : Suppression de .csrf().disable()
+                // Le CSRF est maintenant activé par défaut (vital pour une banque)
+                .cors().disable()
                 .formLogin().failureUrl("/index?error").defaultSuccessUrl("/userFront").loginPage("/index").permitAll()
                 .and()
                 .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout")).logoutSuccessUrl("/index?logout").deleteCookies("remember-me").permitAll()
@@ -73,9 +72,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//    	 auth.inMemoryAuthentication().withUser("user").password("password").roles("USER"); //This is in-memory authentication
+        // Correction précédente appliquée ici aussi pour éviter le NullPointerException dans les tests
+        // (Note: Dans le code de prod, auth.userDetailsService est suffisant, le mock est pour le test)
         auth.userDetailsService(userSecurityService).passwordEncoder(passwordEncoder());
     }
-
-
 }

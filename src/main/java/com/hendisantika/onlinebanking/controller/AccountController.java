@@ -11,9 +11,7 @@ import com.hendisantika.onlinebanking.service.UserService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -36,7 +34,8 @@ public class AccountController {
         this.transactionService = transactionService;
     }
 
-    @RequestMapping("/primaryAccount")
+    // CORRECTION : @GetMapping explicite
+    @GetMapping("/primaryAccount")
     public String primaryAccount(Model model, Principal principal) {
         List<PrimaryTransaction> primaryTransactionList =
                 transactionService.findPrimaryTransactionList(principal.getName());
@@ -50,7 +49,8 @@ public class AccountController {
         return "primaryAccount";
     }
 
-    @RequestMapping("/savingsAccount")
+    // CORRECTION : @GetMapping explicite
+    @GetMapping("/savingsAccount")
     public String savingsAccount(Model model, Principal principal) {
         List<SavingsTransaction> savingsTransactionList =
                 transactionService.findSavingsTransactionList(principal.getName());
@@ -64,14 +64,16 @@ public class AccountController {
         return "savingsAccount";
     }
 
-    @RequestMapping(value = "/deposit", method = RequestMethod.GET)
+    // CORRECTION : @GetMapping moderne
+    @GetMapping("/deposit")
     public String deposit(Model model) {
         model.addAttribute("accountType", "");
         model.addAttribute("amount", "");
         return "deposit";
     }
 
-    @RequestMapping(value = "/deposit", method = RequestMethod.POST)
+    // CORRECTION : @PostMapping moderne
+    @PostMapping("/deposit")
     public String depositPOST(@ModelAttribute("amount") String amount,
                               @ModelAttribute("accountType") String accountType,
                               Principal principal) {
@@ -79,14 +81,16 @@ public class AccountController {
         return "redirect:/userFront";
     }
 
-    @RequestMapping(value = "/withdraw", method = RequestMethod.GET)
+    // CORRECTION : @GetMapping moderne
+    @GetMapping("/withdraw")
     public String withdraw(Model model) {
         model.addAttribute("accountType", "");
         model.addAttribute("amount", "");
         return "withdraw";
     }
 
-    @RequestMapping(value = "/withdraw", method = RequestMethod.POST)
+    // CORRECTION : @PostMapping moderne
+    @PostMapping("/withdraw")
     public String withdrawPOST(@ModelAttribute("amount") String amount,
                                @ModelAttribute("accountType") String accountType,
                                Principal principal) {

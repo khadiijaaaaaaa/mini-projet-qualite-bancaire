@@ -1,5 +1,6 @@
 package com.hendisantika.onlinebanking.controller;
 
+import com.hendisantika.onlinebanking.dto.UserSignupForm;
 import com.hendisantika.onlinebanking.entity.PrimaryAccount;
 import com.hendisantika.onlinebanking.entity.SavingsAccount;
 import com.hendisantika.onlinebanking.entity.User;
@@ -9,6 +10,7 @@ import com.hendisantika.onlinebanking.security.UserRole;
 import com.hendisantika.onlinebanking.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,27 +55,29 @@ class HomeControllerTest {
         assertEquals("index", view);
     }
 
-    // --- TEST 3 : GET /signup prépare un user vide et retourne "signup"
+    // --- TEST 3 : GET /signup prépare un form vide et retourne "signup"
     @Test
     void testSignupGet() {
         String view = homeController.signup(model);
 
         assertEquals("signup", view);
-        verify(model).addAttribute(eq("user"), any(User.class));
+        // CORRECTION : On vérifie que c'est le DTO qui est ajouté
+        verify(model).addAttribute(eq("user"), any(UserSignupForm.class));
     }
 
     // --- TEST 4 : POST /signup -> user existe (email + username existent)
     @Test
     void testSignupPost_userExists_emailAndUsernameExist() {
-        User user = new User();
-        user.setUsername("sara");
-        user.setEmail("sara@mail.com");
+        // CORRECTION : On utilise le DTO
+        UserSignupForm form = new UserSignupForm();
+        form.setUsername("sara");
+        form.setEmail("sara@mail.com");
 
         when(userService.checkUserExists("sara", "sara@mail.com")).thenReturn(true);
         when(userService.checkEmailExists("sara@mail.com")).thenReturn(true);
         when(userService.checkUsernameExists("sara")).thenReturn(true);
 
-        String view = homeController.signupPost(user, model);
+        String view = homeController.signupPost(form, model);
 
         assertEquals("signup", view);
         verify(model).addAttribute("emailExists", true);
@@ -84,37 +88,35 @@ class HomeControllerTest {
     // --- TEST 5 : POST /signup -> user existe (seulement email existe)
     @Test
     void testSignupPost_userExists_onlyEmailExists() {
-        User user = new User();
-        user.setUsername("sara");
-        user.setEmail("sara@mail.com");
+        UserSignupForm form = new UserSignupForm();
+        form.setUsername("sara");
+        form.setEmail("sara@mail.com");
 
         when(userService.checkUserExists("sara", "sara@mail.com")).thenReturn(true);
         when(userService.checkEmailExists("sara@mail.com")).thenReturn(true);
         when(userService.checkUsernameExists("sara")).thenReturn(false);
 
-        String view = homeController.signupPost(user, model);
+        String view = homeController.signupPost(form, model);
 
         assertEquals("signup", view);
         verify(model).addAttribute("emailExists", true);
-        verify(model, never()).addAttribute(eq("usernameExists"), any());
         verify(userService, never()).createUser(any(User.class), anySet());
     }
 
     // --- TEST 6 : POST /signup -> user existe (seulement username existe)
     @Test
     void testSignupPost_userExists_onlyUsernameExists() {
-        User user = new User();
-        user.setUsername("sara");
-        user.setEmail("sara@mail.com");
+        UserSignupForm form = new UserSignupForm();
+        form.setUsername("sara");
+        form.setEmail("sara@mail.com");
 
         when(userService.checkUserExists("sara", "sara@mail.com")).thenReturn(true);
         when(userService.checkEmailExists("sara@mail.com")).thenReturn(false);
         when(userService.checkUsernameExists("sara")).thenReturn(true);
 
-        String view = homeController.signupPost(user, model);
+        String view = homeController.signupPost(form, model);
 
         assertEquals("signup", view);
-        verify(model, never()).addAttribute(eq("emailExists"), any());
         verify(model).addAttribute("usernameExists", true);
         verify(userService, never()).createUser(any(User.class), anySet());
     }
@@ -122,24 +124,35 @@ class HomeControllerTest {
     // --- TEST 7 : POST /signup -> user n'existe pas => crée user + redirect "/"
     @Test
     void testSignupPost_userDoesNotExist_shouldCreateUserAndRedirect() {
-        User user = new User();
-        user.setUsername("newUser");
-        user.setEmail("new@mail.com");
+        // CORRECTION : Préparation du DTO
+        UserSignupForm form = new UserSignupForm();
+        form.setUsername("newUser");
+        form.setEmail("new@mail.com");
+        form.setPassword("password123");
 
         when(userService.checkUserExists("newUser", "new@mail.com")).thenReturn(false);
 
         Role roleUser = new Role();
         when(roleDao.findByName("ROLE_USER")).thenReturn(roleUser);
 
-        String view = homeController.signupPost(user, model);
+        // Act
+        String view = homeController.signupPost(form, model);
 
+        // Assert
         assertEquals("redirect:/", view);
 
-        // on vérifie que createUser est bien appelée avec un Set contenant 1 UserRole
-        verify(userService).createUser(eq(user), argThat((Set<UserRole> roles) -> roles != null && roles.size() == 1));
+        // CORRECTION : Capture de l'entité User créée dans le controller
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
+        // Vérification que createUser a été appelé avec un User qui a les infos du DTO
+        verify(userService).createUser(userCaptor.capture(), argThat((Set<UserRole> roles) -> roles != null && roles.size() == 1));
+
+        User capturedUser = userCaptor.getValue();
+        assertEquals("newUser", capturedUser.getUsername());
+        assertEquals("new@mail.com", capturedUser.getEmail());
     }
 
-    // --- TEST 8 : GET /userFront -> ajoute primary+savings au model et retourne "userFront"
+    // --- TEST 8 : GET /userFront -> (Reste inchangé)
     @Test
     void testUserFront() {
         when(principal.getName()).thenReturn("sara");

@@ -1,5 +1,6 @@
 package com.hendisantika.onlinebanking.controller;
 
+import com.hendisantika.onlinebanking.dto.UserProfileForm;
 import com.hendisantika.onlinebanking.entity.User;
 import com.hendisantika.onlinebanking.service.UserService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,16 +33,23 @@ public class UserController {
     }
 
     @PostMapping("/profile")
-    public String profilePost(@ModelAttribute("user") User newUser, Model model) {
-        User user = userService.findByUsername(newUser.getUsername());
+    public String profilePost(@ModelAttribute("user") UserProfileForm userForm, Model model) {
+        // CORRECTION : On reçoit le DTO userForm au lieu de l'Entité User
 
-        user.setUsername(newUser.getUsername());
-        user.setFirstName(newUser.getFirstName());
-        user.setLastName(newUser.getLastName());
-        user.setEmail(newUser.getEmail());
-        user.setPhone(newUser.getPhone());
+        // On cherche l'utilisateur en base (l'Entité persistante)
+        User user = userService.findByUsername(userForm.getUsername());
+
+        // MAPPING MANUEL : On met à jour l'entité avec les données du DTO
+        // Seuls ces champs seront modifiés. Impossible de modifier l'ID ou le solde.
+        user.setUsername(userForm.getUsername());
+        user.setFirstName(userForm.getFirstName());
+        user.setLastName(userForm.getLastName());
+        user.setEmail(userForm.getEmail());
+        user.setPhone(userForm.getPhone());
 
         userService.saveUser(user);
+
+        // On renvoie l'entité mise à jour à la vue
         model.addAttribute("user", user);
 
         return "profile";

@@ -7,11 +7,7 @@ import com.hendisantika.onlinebanking.service.TransactionService;
 import com.hendisantika.onlinebanking.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,27 +32,32 @@ public class UserResource {
     @Autowired
     private TransactionService transactionService;
 
-    @RequestMapping(value = "/user/all", method = RequestMethod.GET)
+    // CORRECTION : @GetMapping au lieu de RequestMethod.GET
+    @GetMapping("/user/all")
     public List<User> userList() {
         return userService.findUserList();
     }
 
-    @RequestMapping(value = "/user/primary/transaction", method = RequestMethod.GET)
+    // CORRECTION : @GetMapping
+    @GetMapping("/user/primary/transaction")
     public List<PrimaryTransaction> getPrimaryTransactionList(@RequestParam("username") String username) {
         return transactionService.findPrimaryTransactionList(username);
     }
 
-    @RequestMapping(value = "/user/savings/transaction", method = RequestMethod.GET)
+    // CORRECTION : @GetMapping
+    @GetMapping("/user/savings/transaction")
     public List<SavingsTransaction> getSavingsTransactionList(@RequestParam("username") String username) {
         return transactionService.findSavingsTransactionList(username);
     }
 
-    @RequestMapping("/user/{username}/enable")
+    // CORRECTION : @GetMapping explicite (pour éviter que POST/DELETE soient acceptés par erreur)
+    @GetMapping("/user/{username}/enable")
     public void enableUser(@PathVariable("username") String username) {
         userService.enableUser(username);
     }
 
-    @RequestMapping("/user/{username}/disable")
+    // CORRECTION : @GetMapping explicite
+    @GetMapping("/user/{username}/disable")
     public void diableUser(@PathVariable("username") String username) {
         userService.disableUser(username);
     }

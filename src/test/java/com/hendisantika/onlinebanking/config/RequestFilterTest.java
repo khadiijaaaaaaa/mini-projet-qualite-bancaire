@@ -48,12 +48,8 @@ class RequestFilterTest {
         requestFilter.doFilter(request, response, chain);
 
         // Assert
-        // 1. Vérifie que les headers CORS sont bien ajoutés
         verify(response).setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
         verify(response).setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
-
-        // 2. IMPORTANT : Vérifie que la chaîne continue (chain.doFilter est appelé)
-        // C'est le comportement attendu pour une requête normale (le 'if')
         verify(chain, times(1)).doFilter(request, response);
     }
 
@@ -67,21 +63,19 @@ class RequestFilterTest {
         requestFilter.doFilter(request, response, chain);
 
         // Assert
-        // 1. Vérifie les headers spécifiques au Pre-flight
         verify(response).setHeader("Access-Control-Allow-Methods", "POST,GET,DELETE");
         verify(response).setStatus(HttpServletResponse.SC_OK);
-
-        // 2. IMPORTANT : Vérifie que la chaîne S'ARRÊTE (chain.doFilter N'EST PAS appelé)
-        // C'est le comportement attendu pour OPTIONS (le 'else')
         verify(chain, never()).doFilter(request, response);
     }
 
-    // --- TEST 3 : Méthodes init et destroy (pour le 100%) ---
+    // --- TEST 3 : Méthodes init et destroy ---
     @Test
     void testInitAndDestroy() {
-        // Ces méthodes sont vides mais doivent être appelées pour le coverage
-        requestFilter.init(filterConfig);
-        requestFilter.destroy();
-        // Pas d'assertion spéciale, on vérifie juste que ça ne plante pas
+        // CORRECTION SONARQUBE : Ajout d'assertions explicites
+        // "Je certifie que l'appel à init() ne doit pas lancer d'erreur"
+        assertDoesNotThrow(() -> requestFilter.init(filterConfig));
+
+        // "Je certifie que l'appel à destroy() ne doit pas lancer d'erreur"
+        assertDoesNotThrow(() -> requestFilter.destroy());
     }
 }
