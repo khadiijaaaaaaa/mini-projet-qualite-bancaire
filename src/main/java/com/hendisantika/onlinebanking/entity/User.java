@@ -193,19 +193,16 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        // CORRECTION : Suppression du TODO (La logique est correcte pour cette app)
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        // CORRECTION : Suppression du TODO
         return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        // CORRECTION : Suppression du TODO
         return true;
     }
 
