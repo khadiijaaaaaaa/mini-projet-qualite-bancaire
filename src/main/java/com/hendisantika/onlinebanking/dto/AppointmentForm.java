@@ -1,6 +1,7 @@
 package com.hendisantika.onlinebanking.dto;
 
 public class AppointmentForm {
+
     private String location;
     private String description;
 

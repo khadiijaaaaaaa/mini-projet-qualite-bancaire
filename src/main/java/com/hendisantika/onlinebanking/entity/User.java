@@ -1,11 +1,14 @@
 package com.hendisantika.onlinebanking.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hendisantika.onlinebanking.dto.UserBaseForm; // Import du DTO parent
 import com.hendisantika.onlinebanking.security.Authority;
 import com.hendisantika.onlinebanking.security.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,52 +23,36 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by IntelliJ IDEA.
- * Project : online-banking
- * User: hendisantika
- * Email: hendisantika@gmail.com
- * Telegram : @hendisantika34
- * Date: 07/08/18
- * Time: 06.47
- * To change this template use File | Settings | File Templates.
- */
 @Entity
-public class User implements UserDetails {
+// CORRECTION : On réapplique les contraintes BDD sur l'email hérité du DTO
+@AttributeOverrides({
+        @AttributeOverride(name = "email", column = @Column(name = "email", nullable = false, unique = true))
+})
+public class User extends UserBaseForm implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userId", nullable = false, updatable = false)
     private Long userId;
-    private String username;
+
+    // username, firstName, lastName, email, phone SONT SUPPRIMÉS (hérités)
+
     private String password;
-    private String firstName;
-    private String lastName;
-
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
-    private String phone;
-
     private boolean enabled = true;
 
-    // CORRECTION (S1948): Ajout de 'transient' pour éviter les erreurs de sérialisation
     @OneToOne
     private transient PrimaryAccount primaryAccount;
 
-    // CORRECTION (S1948): Ajout de 'transient'
     @OneToOne
     private transient SavingsAccount savingsAccount;
 
-    // CORRECTION (S1948): Ajout de 'transient'
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private transient List<Appointment> appointmentList;
 
-    // CORRECTION (S1948): Ajout de 'transient'
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private transient List<Recipient> recipientList;
 
-    // CORRECTION (S1948): Ajout de 'transient'
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private transient Set<UserRole> userRoles = new HashSet<>();
@@ -86,45 +73,7 @@ public class User implements UserDetails {
         this.userId = userId;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    // Les Getters/Setters pour username, firstName, etc. sont hérités, on les supprime ici.
 
     public List<Appointment> getAppointmentList() {
         return appointmentList;
@@ -142,6 +91,7 @@ public class User implements UserDetails {
         this.recipientList = recipientList;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -170,12 +120,12 @@ public class User implements UserDetails {
     public String toString() {
         return "User{" +
                 "userId=" + userId +
-                ", username='" + username + '\'' +
+                ", username='" + getUsername() + '\'' + // Utilisation des getters hérités
                 ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", phone='" + phone + '\'' +
+                ", firstName='" + getFirstName() + '\'' +
+                ", lastName='" + getLastName() + '\'' +
+                ", email='" + getEmail() + '\'' +
+                ", phone='" + getPhone() + '\'' +
                 ", appointmentList=" + appointmentList +
                 ", recipientList=" + recipientList +
                 ", userRoles=" + userRoles +
@@ -185,8 +135,6 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
-        // Note: userRoles est transient, s'assurer qu'il est chargé avant d'appeler getAuthorities
-        // dans un contexte transactionnel, ou via FetchType.EAGER (ce qui est le cas ici)
         userRoles.forEach(ur -> authorities.add(new Authority(ur.getRole().getName())));
         return authorities;
     }
